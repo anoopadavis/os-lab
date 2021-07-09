@@ -1,0 +1,26 @@
+alias processid R10;
+alias pte R11;
+alias checkstat R12;
+
+processid = [SYSTEM_STATUS_TABLE + 1];
+pte = PROCESS_TABLE + processid*16;
+
+[pte + 4] = TERMINATED;
+
+processid = 1;
+checkstat = 0;
+while(processid<MAX_PROC_NUM) do
+    pte = PROCESS_TABLE + processid*16;
+    if([pte + 4] != TERMINATED) then
+        checkstat = 1;
+        break;
+    endif;
+    processid = processid + 1;
+endwhile;
+
+if(checkstat == 0) then
+    halt;
+endif;
+
+call CONTEXT_SWITCH;
+

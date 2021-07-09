@@ -1,0 +1,2 @@
+#!/bin/bash
+rg $* *.spl --with-filename | rg -v '.*: *//' | rg -v '// KEEP'

@@ -1,0 +1,5 @@
+MOV R0, "Some looooong message."
+JMP _LABEL
+_LABEL:
+MOV R0, "OK"
+MOV R0, "FAIL"

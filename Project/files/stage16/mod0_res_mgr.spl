@@ -1,0 +1,54 @@
+alias rValue R0;
+alias functionNum R1;
+alias currentPID R2;
+alias _pte R10;
+alias _i R11;
+
+if(functionNum == ACQUIRE_TERMINAL)
+then
+    _pte = PROCESS_TABLE + currentPID*16;
+
+    while([TERMINAL_STATUS_TABLE+0] == 1)
+    do
+        [_pte + 4] = WAIT_TERMINAL;
+        multipush(R1, R2);
+        call CONTEXT_SWITCH;
+        multipop(R1, R2);
+    endwhile;
+
+    [TERMINAL_STATUS_TABLE+0] = 1;
+    [TERMINAL_STATUS_TABLE+1] = currentPID;
+    breakpoint;
+    return;
+endif;
+
+if(functionNum == RELEASE_TERMINAL)
+then
+    if([TERMINAL_STATUS_TABLE+1] != currentPID)
+    then
+        rValue = -1;
+        return;
+    endif;
+
+    [TERMINAL_STATUS_TABLE+0] = 0;
+    rValue = 0;
+
+    _i = 1;
+    while(_i < MAX_PROC_NUM)
+    do
+        _pte = PROCESS_TABLE + _i*16;
+        if([_pte+4] == WAIT_TERMINAL)
+        then
+            [_pte+4] = READY;
+        endif;
+        _i = _i+1;
+    endwhile;
+    breakpoint;
+    return;
+endif;
+
+return;
+
+
+
+

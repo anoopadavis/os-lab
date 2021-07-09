@@ -1,0 +1,6 @@
+**/disk.xfs
+**/tags
+**/.temp
+
+files/**/__exec_history__.xsm
+files/**/mem

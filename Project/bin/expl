@@ -1,0 +1,11 @@
+#!/bin/bash
+
+explDir=$OS_LAB_PROJ_DIR/"myexpos/expl"
+
+wd=`pwd`
+file=$wd/$1
+
+cd $explDir
+./expl $file
+rm assemblycode.xsm
+cd $wd

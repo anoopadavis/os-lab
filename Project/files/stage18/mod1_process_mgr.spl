@@ -1,0 +1,80 @@
+alias returnValue R0;
+alias functionNum R1;
+alias arg1 R2;
+
+alias PID R11;
+
+if(functionNum == EXIT_PROCESS)
+then
+    alias processTableEntry R12;
+
+    PID = [SYSTEM_STATUS_TABLE+1];
+
+    functionNum = FREE_PAGE_TABLE;
+    arg1 = PID;
+    multipush(R11);
+    call PROCESS_MANAGER;
+    multipop(R11);
+
+
+    functionNum = FREE_USER_AREA_PAGE;
+    arg1 = PID;
+    multipush(R11);
+    call PROCESS_MANAGER;
+    multipop(R11);
+
+    processTableEntry = PROCESS_TABLE + PID*16;
+    [processTableEntry + 4] = TERMINATED;
+
+    return;
+endif;
+
+if(functionNum == FREE_USER_AREA_PAGE)
+then
+    alias processTableEntry R12;
+    alias UAreaPage R13;
+
+    PID = arg1;
+    processTableEntry = PROCESS_TABLE + PID*16;
+    UAreaPage = [processTableEntry+11];
+
+    R1 = RELEASE_PAGE;
+    R2 = UAreaPage;
+    call MEMORY_MANAGER;
+
+    return;
+endif;
+
+if(functionNum == FREE_PAGE_TABLE)
+then
+    alias pageTableEntry R12;
+    alias i R13;
+
+    PID = arg1;
+
+    pageTableEntry = PAGE_TABLE_BASE+PID*20;
+
+    // Free Library
+    [pageTableEntry+0] = -1;
+    [pageTableEntry+1] = "0000";
+    [pageTableEntry+2] = -1;
+    [pageTableEntry+3] = "0000";
+
+    i = 2;
+    while(i<10)
+    do
+        if([pageTableEntry+(2*i)] != -1)
+        then
+
+            R1 = RELEASE_PAGE;
+            R2 = [pageTableEntry+2*i];
+            call MEMORY_MANAGER;
+
+            [pageTableEntry+2*i] = -1;
+            [pageTableEntry+2*i+1] = "0000";
+        endif;
+        i = i + 1;
+    endwhile;
+    return;
+endif;
+

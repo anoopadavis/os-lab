@@ -1,0 +1,54 @@
+alias functionNum R1;
+alias currentPID R2;
+alias Word R3;
+
+if(functionNum == TERMINAL_WRITE)
+then
+    multipush(R1, R2, R3);
+    functionNum = ACQUIRE_TERMINAL;
+    call RESOURCE_MANAGER;
+    multipop(R1, R2, R3);
+
+    print R3;
+
+    functionNum = RELEASE_TERMINAL;
+    call RESOURCE_MANAGER;
+
+    return;
+endif;
+
+
+if(functionNum == TERMINAL_READ)
+then
+    multipush(R1, R2, R3);
+    functionNum = ACQUIRE_TERMINAL;
+    call RESOURCE_MANAGER;
+    multipop(R1, R2, R3);
+    
+    breakpoint;
+
+    read;
+    
+    [PROCESS_TABLE + currentPID*16 + 4] = WAIT_TERMINAL;
+    multipush(R2, R3);
+    call CONTEXT_SWITCH;
+    multipop(R2, R3);
+
+    //logical page
+    R10 = Word/512;
+    
+    //physical page
+    R10 = [PTBR + R10*2];
+    
+    
+    R10 = R10*512 + (Word % 512);
+    [R10] = [PROCESS_TABLE + currentPID*16 + 8];
+
+    breakpoint;
+    functionNum = RELEASE_TERMINAL;
+    call RESOURCE_MANAGER;
+
+    return;
+endif;
+return;
+

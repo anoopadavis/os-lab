@@ -1,0 +1,37 @@
+0
+2056
+0
+0
+0
+0
+0
+0
+MOV R0, 1234
+
+PUSH R0;    // save R0
+
+MOV R1, 5;
+PUSH R1;     // Syscall no.
+MOV R1, -2;
+PUSH R1;    // FD = stdout
+PUSH R0;    // word to write
+PUSH R1;    // dummy arg3
+PUSH R1;    // reserve space for retval
+INT 7;      // Write syscall
+
+POP R1;     // Retval
+POP R2;     // arg3
+POP R2;     // arg2
+POP R2;     // arg1
+POP R2;     // syscall no.
+
+POP R0;     // restore R0
+
+INR R0
+MOV R1, 2345
+MOV R2, R0
+LE R2, R1
+
+JNZ R2, 2058
+
+INT 10

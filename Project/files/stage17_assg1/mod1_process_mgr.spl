@@ -1,0 +1,74 @@
+alias returnValue R0;
+alias functionNum R1;
+alias arg1 R2;
+
+alias PID R11;
+
+if(functionNum == EXIT_PROCESS)
+then
+    alias pte R12;
+
+    PID = [SYSTEM_STATUS_TABLE+1];
+
+    functionNum = FREE_PAGE_TABLE;
+    arg1 = PID;
+    call PROCESS_MANAGER;
+
+    functionNum = FREE_USER_AREA_PAGE;
+    arg1 = PID;
+    call PROCESS_MANAGER;
+
+    pte = PROCESS_TABLE + PID*16;
+    [pte + 4] = TERMINATED;
+
+    return;
+endif;
+
+if(functionNum == FREE_USER_AREA_PAGE)
+then
+    alias pte R12;
+    alias UAreaPage R13;
+
+    PID = arg1;
+    pte = PROCESS_TABLE + PID*16;
+    UAreaPage = [pte+11];
+
+    R1 = RELEASE_PAGE;
+    R2 = UAreaPage;
+    call MEMORY_MANAGER;
+
+    return;
+endif;
+
+if(functionNum == FREE_PAGE_TABLE)
+then
+    alias pte R12;
+    alias i R13;
+
+    PID = arg1;
+
+    pte = PAGE_TABLE_BASE+PID*20;
+
+    // Free Library
+    [pte+0] = -1;
+    [pte+1] = "0000";
+    [pte+2] = -1;
+    [pte+3] = "0000";
+
+    i = 2;
+    while(i<10)
+    do
+        if([pte+(2*i)] != -1)
+        then
+
+            R1 = RELEASE_PAGE;
+            R2 = [pte+2*i];
+            call MEMORY_MANAGER;
+
+            [pte+2*i] = -1;
+            [pte+2*i+1] = "0000";
+        endif;
+    endwhile;
+    return;
+endif;
+

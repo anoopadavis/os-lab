@@ -1,0 +1,81 @@
+alias functionNum R1;
+if(functionNum == TERMINAL_WRITE)
+then
+    // args
+    alias currentPID R2;
+    alias wordToPrint R3;
+
+    multipush(R2, R3);
+    R1 = ACQUIRE_TERMINAL;
+    // R2 = currentPID is already set
+    call RESOURCE_MANAGER;
+    multipop(R2, R3);
+
+    print wordToPrint;
+
+    R1 = RELEASE_TERMINAL;
+    // R2 = currentPID is already set
+    call RESOURCE_MANAGER;
+
+    return;
+endif;
+
+if(functionNum == TERMINAL_READ)
+then
+    // args
+    alias currentPID R2;
+    alias wordPtr R3;
+
+    multipush(R2, R3);
+    R1 = ACQUIRE_TERMINAL;
+    // R2 = currentPID is already set
+    call RESOURCE_MANAGER;
+    multipop(R2, R3);
+
+    read;
+
+    [PROCESS_TABLE + currentPID*16 + 4] = WAIT_TERMINAL;
+    multipush(R2, R3);
+    call CONTEXT_SWITCH;
+    multipop(R2, R3);
+
+    // Logical page num
+    R10 = wordPtr/512;
+    // Physical page num
+    R10 = [PTBR + R10*2];
+    // Physical address
+    R10 = R10*512 + (wordPtr % 512);
+    [R10] = [PROCESS_TABLE + currentPID*16 + 8];
+
+    return;
+endif;
+
+if(functionNum == DISK_LOAD)
+then
+    // args
+    alias currentPID R2;
+    alias page R3;
+    alias block R4;
+
+    multipush(R2, R3);
+    R1 = ACQUIRE_DISK;
+    // R2 = currentPID is already set
+    call RESOURCE_MANAGER;
+    multipop(R2, R3);
+
+
+    [DISK_STATUS_TABLE+1] = 0; // LOAD/STORE BIT = LOAD
+    [DISK_STATUS_TABLE+2] = page;
+    [DISK_STATUS_TABLE+3] = block;
+
+    load(page, block);
+
+    [PROCESS_TABLE + currentPID*16 + 4] = WAIT_DISK;
+    multipush(R2, R3);
+    call CONTEXT_SWITCH;
+    multipop(R2, R3);
+
+    return;
+endif;
+return;
+

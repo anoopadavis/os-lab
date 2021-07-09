@@ -1,0 +1,12 @@
+MOV R0, 1
+here:
+MOV R1, R0
+MOV R2, 20
+GT R1, R2
+JNZ R1, end
+PORT P1, R0
+OUT
+INR R0
+JMP here
+end:
+HALT

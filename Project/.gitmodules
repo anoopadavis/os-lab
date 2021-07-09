@@ -1,0 +1,27 @@
+[submodule "myexpos/xsm"]
+	path = myexpos/xsm
+	url = https://github.com/happycoder97/xsm
+[submodule "myexpos/spl"]
+	path = myexpos/spl
+	url = https://github.com/happycoder97/spl.git
+[submodule "myexpos/xfs-interface"]
+	path = myexpos/xfs-interface
+	url = https://github.com/happycoder97/xfs-interface.git
+[submodule "myexpos/expl"]
+	path = myexpos/expl
+	url = https://github.com/happycoder97/expl.git
+[submodule "xdb"]
+	path = xdb
+	url = https://github.com/happycoder97/expos-xdb.git
+[submodule "expos-vim-plugins"]
+	path = expos-vim-plugins
+	url = https://github.com/happycoder97/expos-vim-plugins.git
+[submodule "mynexpos/nexsm"]
+	path = mynexpos/nexsm
+	url = https://github.com/eXpOSNitc/nexsm.git
+[submodule "mynexpos/nexfs-interface"]
+	path = mynexpos/nexfs-interface
+	url = https://github.com/eXpOSNitc/nexfs-interface.git
+[submodule "mynexpos/nespl"]
+	path = mynexpos/nespl
+	url = https://github.com/eXpOSNitc/nespl.git

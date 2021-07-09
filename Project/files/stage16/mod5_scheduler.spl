@@ -1,0 +1,53 @@
+alias process_id R0;
+alias pte R2;
+alias i R10;
+alias uPageNum R11;
+alias koffset R12;
+
+multipush(BP);
+
+process_id = [SYSTEM_STATUS_TABLE+1];
+pte = PROCESS_TABLE + process_id*16;
+[pte + 12] = SP % 512;
+[pte + 14] = PTBR;
+[pte + 15] = PTLR;
+
+
+process_id = process_id + 1;
+while(process_id<MAX_PROC_NUM) do
+    pte = PROCESS_TABLE + process_id*16;
+    if([pte + 4] == READY || [pte + 4] == CREATED) then
+        break;
+    endif;
+    process_id = process_id + 1;
+endwhile;
+
+
+if(process_id == MAX_PROC_NUM) then
+    process_id = 0;
+    pte = PROCESS_TABLE + process_id*16;
+endif;
+
+
+uPageNum = [pte + 11];
+koffset = [pte + 12];
+SP = uPageNum * 512 + koffset;
+
+PTBR = [pte + 14];
+PTLR = [pte + 15];
+
+[SYSTEM_STATUS_TABLE + 1] = process_id;
+
+if([pte + 4] == CREATED) then
+    [pte + 4] = RUNNING;
+    [pte + 9] = 0;
+    SP = [pte + 13];
+    ireturn;
+endif;
+
+[pte + 4] = RUNNING;
+[pte + 9] = 0;
+multipop(BP);
+return;
+
+

@@ -1,0 +1,15 @@
+#!/usr/bin/python
+import os
+import sys
+
+OS_LAB_PROJ_DIR = os.environ["OS_LAB_PROJ_DIR"]
+
+splconstants_file = OS_LAB_PROJ_DIR + "/myexpos/spl/splconstants.cfg"
+splconstants = dict(c.split() for c in open(splconstants_file).readlines() if len(c.strip()) > 0)
+
+for name, val in splconstants.items():
+    globals()[name] = int(val)
+
+
+args = " ".join(str(s) for s  in sys.argv[1:])
+print(eval(args))

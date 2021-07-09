@@ -1,0 +1,35 @@
+breakpoint;
+
+alias cPID R0;
+alias nPID R1;
+alias pte R2;
+alias npte R3;
+alias k R10;
+
+// Save UPTR
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE+1]*16 + 13] = SP;
+// Kernel Stack
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE+1]*16 + 11]*512 - 1;
+backup;
+
+cPID = [SYSTEM_STATUS_TABLE+1];
+pte = PROCESS_TABLE + cPID*16;
+
+[pte + 12] = SP % 512;
+[pte + 14] = PTBR;
+[pte + 15] = PTLR;
+[pte + 4] = READY;
+
+k = 0;
+while(k<MAX_PROC_NUM) do
+    if([PROCESS_TABLE+k*16+4] != TERMINATED) then
+        [PROCESS_TABLE + k*16] = [PROCESS_TABLE + k*16] + 1;
+    endif;
+    k = k+1;
+endwhile;
+call CONTEXT_SWITCH;
+
+restore;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE+1]*16 + 13];
+
+ireturn;
